@@ -10,7 +10,6 @@ genai.configure(api_key=GEMINI_API_KEY)
 CSV_FILE = 'flashcards.csv'
 
 def get_explanation(question, answer):
-    """Get an explanation for the flashcard using Gemini AI"""
     try:
         model = genai.GenerativeModel('gemini-2.0-flash')
         prompt = f"""
