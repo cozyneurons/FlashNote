@@ -2,8 +2,31 @@ import csv
 import os
 from datetime import datetime, timedelta
 import random
+import google.generativeai as genai
+
+GEMINI_API_KEY = "AIzaSyCexRrIovZRZ1uZ8KG21zplgDybR52IbRk"
+genai.configure(api_key=GEMINI_API_KEY)
 
 CSV_FILE = 'flashcards.csv'
+
+def get_explanation(question, answer):
+    """Get an explanation for the flashcard using Gemini AI"""
+    try:
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        prompt = f"""
+        Provide a clear, concise explanation for the following flashcard.
+        Keep it brief (1-2 sentences) and easy to understand.
+        
+        Question: {question}
+        Correct Answer: {answer}
+        
+        Explanation:
+        """
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"⚠️ Could not get AI explanation: {str(e)}")
+        return "No explanation available."
 
 def add_flashcard(question, answer, subject):
     today = datetime.today().date().isoformat()
@@ -112,6 +135,10 @@ def main():
                 input("Press Enter to show answer...")
                 print(f"🧠 A: {card['answer']}")
                 got_it = input("Did you get it right? (y/n): ").strip().lower() == 'y'
+                if got_it == False:
+                    explanation = get_explanation(card['question'], card['answer'])
+                    print(f"❌ Incorrect! The correct answer is: {card['answer']}")
+                    print(f"💡 Explanation: {explanation}")
                 update_flashcard(card, got_it)
                 if got_it:
                     score += 1
@@ -140,3 +167,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
